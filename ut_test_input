@@ -1,0 +1,19 @@
+# This is the input file for ut_test
+# Comments start with '#'
+# Unit test case names appear followed by a ':'
+# A list of related files should appear after the unit test cases
+#
+# See the rest of file for example.
+
+
+biz/Money/implementation/Payments/unit_test/TestPaymentResponseBuilderImpl.tst:
+	- biz/Money/implementation/Payments/PaymentResponseBuilderImpl.cpp
+	- some random file
+
+biz/Money/implementation/Payments/unit_test/TestPayLegacyDataBuilder.tst:
+	- biz/Money/implementation/Payments/PayLegacyDataBuilder.cpp
+	- biz/Money/implementation/Payments/PayLegacyDataBuilder.h
+	
+biz/Money/implementation/Payments/unit_test/TransactionPropertyTest.tst:
+	- biz/Money/implementation/Payments/TransactionProperty.cpp
+	- biz/Money/implementation/Payments/TransactionProperty.h
