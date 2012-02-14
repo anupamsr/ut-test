@@ -1,0 +1,11 @@
+=======
+UT Test
+=======
+
+This script checks the quality of unit test cases by doing injection testing.
+
+UT Test takes a list of unit test cases and corresponding files to be tested
+through an input file that mildly resembles YAML. Check 'ut_test_input' for
+sample input format.
+
+This tool should be run from the buildtop.
