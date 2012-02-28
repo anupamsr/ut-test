@@ -21,7 +21,7 @@ use UTTest;
 my $arg_len = scalar @ARGV;
 if ($arg_len == 0)
 {
-	UTTest::help();
+    UTTest::help();
     exit(0);
 }
 elsif ($arg_len > 1)
@@ -58,7 +58,7 @@ foreach my $ut (keys %parsed_hash)
         $log->error('Broken UT test, won\'t proceed with injection testing');
         next;
     }
-    
+
     foreach my $file (@{$parsed_hash{$ut}})
     {
         $log->info("Processing file: $file");
@@ -74,7 +74,7 @@ foreach my $ut (keys %parsed_hash)
         }
 
         copy($file, $file_backup)
-            or $log->error('Couldn\'t take a backup. Error creating ' . 
+            or $log->error('Couldn\'t take a backup. Error creating ' .
             $file_backup, $prefix);
 
         my $rc;
@@ -87,17 +87,17 @@ foreach my $ut (keys %parsed_hash)
             Modifier::CPP::or_to_and($file_backup, $file, $log, $prefix);
             UTTest::compile_and_check($ut, $log, $prefix);
 
-			copy($file_backup, $file) or $log->error('Couldn\'t restore ' .
-				'backup.', $prefix);
+            copy($file_backup, $file) or $log->error('Couldn\'t restore ' .
+                'backup.', $prefix);
         }
         elsif ($file =~ m/h$/)
         {
-			Modifier::H::protected_to_private($file_backup, $file, $log,
-				$prefix);
-			UTTest::compile_and_check($ut, $log, $prefix);
+            Modifier::H::protected_to_private($file_backup, $file, $log,
+                $prefix);
+            UTTest::compile_and_check($ut, $log, $prefix);
 
-			copy($file_backup, $file) or $log->error('Couldn\'t restore ' .
-				'backup.', $prefix);
+            copy($file_backup, $file) or $log->error('Couldn\'t restore ' .
+                'backup.', $prefix);
         }
         else
         {
