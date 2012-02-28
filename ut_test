@@ -21,7 +21,7 @@ use UTTest;
 my $arg_len = scalar @ARGV;
 if ($arg_len == 0)
 {
-    help();
+	UTTest::help();
     exit(0);
 }
 elsif ($arg_len > 1)
