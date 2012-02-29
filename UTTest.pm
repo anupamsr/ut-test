@@ -112,7 +112,7 @@ sub check
         return $rc;
     }
     print "OK\n";
-    $logger->debug('Compilation passed');
+    $logger->debug('Check passed');
     return $rc;
 }
 
