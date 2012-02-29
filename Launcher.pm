@@ -4,13 +4,13 @@ use strict;
 use warnings;
 
 use IPC::Open3 qw(open3);
-use Log::BasicLogger;
+use Log::Log4perl qw(get_logger);
 
 sub sync
 {
     my $cmd = shift;
-    my $log = shift;
-    my $prefix = shift;
+
+    my $logger = get_logger("launcher");
 
     local (*chld_wrt, *chld_rdr, *chld_err);
     my $pid = open3(*chld_wrt, *chld_rdr, *chld_err, $cmd);
@@ -27,7 +27,7 @@ sub sync
     my $rc = $?;
     if ($rc == 0)
     {
-        $log->debug("$cmd returned $?", $prefix);
+        $logger->debug("$cmd returned $?");
     }
 
     my %output;

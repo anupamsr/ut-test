@@ -5,17 +5,17 @@ use warnings;
 
 use Data::Dumper;
 use Launcher;
-use Log::BasicLogger;
+use Log::Log4perl qw(get_logger);
 
 sub compile
 {
     my $ut  = shift;
-    my $log = shift;
-    my $prefix = shift;
+
+    my $logger = get_logger("mm");
 
     my $cmd = "mm make $ut";
-    my %output = %{Launcher::sync($cmd, $log, $prefix)};
-    $log->debug(Dumper \%output, $prefix);
+    my %output = %{Launcher::sync($cmd, $logger)};
+    $logger->debug(Dumper \%output);
 
     my $rc = $output{rc};
     return $rc;
@@ -24,12 +24,12 @@ sub compile
 sub check
 {
     my $ut  = shift;
-    my $log = shift;
-    my $prefix = shift;
+
+    my $logger = get_logger("mm");
 
     my $cmd = "mm check $ut";
-    my %output = %{Launcher::sync($cmd, $log, $prefix)};
-    $log->debug(Dumper \%output, $prefix);
+    my %output = %{Launcher::sync($cmd, $logger)};
+    $logger->debug(Dumper \%output);
 
     my $rc = $output{rc};
     return $rc;

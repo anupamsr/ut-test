@@ -3,106 +3,12 @@
 use strict;
 use warnings;
 
-# Standard modules
-use Carp;
-use Data::Dumper;
-use File::Copy;
 use FindBin;
-use lib "$FindBin::RealBin"; # use the parent directory
+use lib "$FindBin::RealBin"; # use the location of script
 
-# User modules
-use Log::BasicLogger;
-use MM;
-use Modifier::CPP;
-use Modifier::H;
-use UTTest;
+# Check if BUILDTOP is set
+die 'BUILDTOP is not set' unless defined $ENV{BUILDTOP};
 
-# Parse arguments
-my $arg_len = scalar @ARGV;
-if ($arg_len == 0)
-{
-    UTTest::help();
-    exit(0);
-}
-elsif ($arg_len > 1)
-{
-    croak 'Only 1 argument is needed, specifying the input file';
-}
+die '1 and only 1 argument is needed' if scalar @ARGV > 1;
 
-# Check if BUILDTOP is se
-croak "BUILDTOP is not set$!" unless defined $ENV{BUILDTOP};
-
-# Set default values
-my $file = $ARGV[0];
-my $log_file = "$FindBin::Script.log";
-
-# Initialize logger
-my $log = Log::BasicLogger->new({
-        PATH => $log_file,
-        FILE_LEVEL => 'DEBUG',
-        SCREEN_LEVEL => 'INFO',
-        APPEND => 1,
-        MAX_ERRORS => 0,
-    });
-
-my %parsed_hash = %{UTTest::parse_input($file, $log)};
-$log->debug(Dumper \%parsed_hash);
-
-foreach my $ut (keys %parsed_hash)
-{
-    $log->info("Testing unit test: $ut...");
-    $log->info('Checking current status...');
-    my $rc = UTTest::compile_and_check($ut, $log);
-    if ($rc != 0)
-    {
-        $log->error('Broken UT test, won\'t proceed with injection testing');
-        next;
-    }
-
-    foreach my $file (@{$parsed_hash{$ut}})
-    {
-        $log->info("Processing file: $file");
-        my $prefix = '  ';
-
-        # Take backup
-        $log->debug('Taking backup...', $prefix);
-        my $file_backup = $file . '.backup';
-        if (-f $file_backup)
-        {
-            $log->warn('Backup already exists... skipping file', $prefix);
-            next;
-        }
-
-        copy($file, $file_backup)
-            or $log->error('Couldn\'t take a backup. Error creating ' .
-            $file_backup, $prefix);
-
-        my $rc;
-        if ($file =~ m/cpp$/)
-        {
-            Modifier::CPP::plus_to_minus($file_backup, $file, $log, $prefix);
-            UTTest::compile_and_check($ut, $log, $prefix);
-            Modifier::CPP::less_to_greater($file_backup, $file, $log, $prefix);
-            UTTest::compile_and_check($ut, $log, $prefix);
-            Modifier::CPP::or_to_and($file_backup, $file, $log, $prefix);
-            UTTest::compile_and_check($ut, $log, $prefix);
-
-            copy($file_backup, $file) or $log->error('Couldn\'t restore ' .
-                'backup.', $prefix);
-        }
-        elsif ($file =~ m/h$/)
-        {
-            Modifier::H::protected_to_private($file_backup, $file, $log,
-                $prefix);
-            UTTest::compile_and_check($ut, $log, $prefix);
-
-            copy($file_backup, $file) or $log->error('Couldn\'t restore ' .
-                'backup.', $prefix);
-        }
-        else
-        {
-            $log->warn("Unsupported file type... ignoring.", $prefix);
-        }
-    }
-}
-
+exec "$FindBin::RealBin/ut_test_launcher", $FindBin::Script, @ARGV;

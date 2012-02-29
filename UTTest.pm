@@ -5,82 +5,49 @@ use warnings;
 
 use Carp;
 use Data::Dumper;
-use Log::BasicLogger;
+use File::Copy;
+use Log::Log4perl qw(get_logger);
+use MM;
+use Modifier;
 
-sub help()
-{
-    print "Usage: $0 [INPUT_FILE]\n";
-    print "\n";
-    print "This tool should be run from the buildtop.\n";
-    print "\n";
-    print 'IMPORTANT: Take a backup before you run this tool. You might ' .
-    "lose your changes.\n";
-}
-
-sub compile_and_check
-{
-    my $ut  = shift;
-    my $log = shift;
-    my $prefix = shift;
-    croak unless defined $ut;
-
-    my $rc = MM::compile($ut, $log, $prefix);
-    if ($rc != 0)
-    {
-        $log->debug('Compilation failed', $prefix);
-    }
-    else
-    {
-        $log->debug('Compilation passed', $prefix);
-        $rc = MM::check($ut, $log, $prefix);
-        if ($rc != 0)
-        {
-            $log->debug('Unit test failed', $prefix);
-        }
-        else
-        {
-            $log->debug('Unit test passed', $prefix);
-        }
-    }
-    return $rc;
-}
-
-sub parse_input
+sub parse_conf
 {
     my $file = shift;
-    my $log = shift;
-    my $prefix = shift;
+    croak unless defined $file;
 
-    if (-f $file)
-    {
-        open FILE, '<', $file or croak "Error opening $file for reading$!";
-    }
-    else
-    {
-        croak "$file is not a file.";
-    }
+    my $logger = get_logger('ut_test');
 
-    $log->info("Parsing input file $file...", $prefix);
+    croak "Error opening $file for reading$!" unless open FILE, '<', $file;
+
+    print "Parsing configuration file $file ... ";
     my $ut = '';
     my %parsed_hash;
     while (my $line = <FILE>)
     {
         chomp ($line);
+
+        # This is a comment
         if ($line =~ m/^\s*#/)
         {
-            $log->debug("COMMENT: $line", $prefix);
+            $logger->debug("COMMENT: $line");
         }
+
+        # This is a UT
         elsif ($line =~ m/tst\s*:\s*$/)
         {
             $ut = $line;
             $ut =~ s/:\s*$//;
         }
+
+        # This is a file, which should correspond to a UT
         elsif ($line =~ m/^\s*-\s*\w+/)
         {
-            $log->fatal('File specified without mentioning unit test case ' .
-                "($line)$!", $prefix) unless defined $ut;
+            $logger->fatal('File specified without mentioning unit test case ' .
+                "($line)$!") unless defined $ut;
+
             my $file = $line;
-            $file =~ s/^\s*-\s*//;
+            $file =~ s/^\s*-\s*//; # Remove whitespace
+
             my @files;
             if (defined $parsed_hash{$ut})
             {
@@ -89,18 +56,127 @@ sub parse_input
             push @files, $file;
             $parsed_hash{$ut} = \@files;
         }
+
+        # This is just a blank file
         elsif ($line =~ m/^\s*$/)
         {
-            $log->debug('Ignoring blank line', $prefix);
         }
+
+        # Nothing else is allowed
         else
         {
-            $log->fatal("Problem parsing $file, encountered '$line'$!", $prefix);
+            $logger->fatal("Problem parsing $file, encountered '$line'$!");
         }
     }
     
+    print "DONE\n";
     close $file;
     return \%parsed_hash;
+}
+
+sub compile
+{
+    my $ut = shift;
+    croak 'No argument passed' unless defined $ut;
+
+    my $logger = get_logger('ut_test');
+
+    $logger->debug("Compiling $ut");
+    print 'Compiling... ';
+    my $rc = MM::compile($ut);
+    if ($rc != 0)
+    {
+        print "FAIL\n";
+        $logger->debug("Compilation failed with rc = $rc");
+        return $rc;
+    }
+    print "OK\n";
+    $logger->debug('Compilation passed');
+    return $rc;
+}
+
+sub check
+{
+    my $ut = shift;
+    croak 'No argument passed' unless defined $ut;
+
+    my $logger = get_logger('ut_test');
+
+    $logger->debug("Checking $ut");
+    print 'Checking... ';
+    my $rc = MM::check($ut);
+    if ($rc != 0)
+    {
+        print "FAIL\n";
+        $logger->debug("Check failed with rc = $rc");
+        return $rc;
+    }
+    print "OK\n";
+    $logger->debug('Compilation passed');
+    return $rc;
+}
+
+sub get_modifiers
+{
+    my $logger = get_logger('ut_test');
+
+    my $mod_obj = Modifier->new();
+    my @modifiers = $mod_obj->list;
+    $logger->debug('List of modifiers detected:');
+    $logger->debug(Dumper \@modifiers);
+
+    return \@modifiers;
+}
+
+sub test
+{
+    my $ut = shift;
+    my @files = @{(shift)};
+    croak 'No argument passed for ut' unless defined $ut;
+    croak 'No argument passed for file-list' unless scalar @files != 0;
+    my $logger = get_logger('ut_test');
+
+    my @modifiers = @{get_modifiers()};
+
+    foreach my $file (@files)
+    {
+        # Read file contents into an array
+        open FH, '<', $file or $logger->fatal("Error opening $file for " .
+            'reading... skipping!');
+        my @file_content = <FH>;
+        close FH;
+
+        foreach my $modifier (@modifiers)
+        {
+            # Skip if cannot be used
+            next unless $modifier->can('modify');
+
+            my $rc = $modifier->modify($file, \@file_content);
+            if ($rc == 0)
+            {
+                $logger->debug('Nothing to modify');
+            }
+            elsif ($rc > 0)
+            {
+                $rc = compile($ut);
+                if ($rc == 0)
+                {
+                    $rc = check($ut);
+                    if ($rc == 0)
+                    {
+                        $logger->error("PROBLEM: $ut did't catch this type of bug");
+                    }
+                }
+
+                # Restore original
+                $logger->debug("Restoring original $file");
+                open FH, '>', $file or $logger->fatal("Couldn't restore, " .
+                    ' please do it manually.');
+                print FH @file_content;
+                close FH;
+            }
+        }
+    }
 }
 
 1;

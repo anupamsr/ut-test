@@ -1,0 +1,104 @@
+#!/usr/bin/perl
+
+use strict;
+use warnings;
+
+use FindBin;
+use lib "$FindBin::RealBin"; # use the location of script
+use lib "$ENV{BUILDTOP}/qatools/perllib/3rdParty/"; # use for Log4perl
+
+use Data::Dumper;
+use Log::Log4perl qw(get_logger :levels);
+use UTTest;
+
+sub help()
+{
+    print "Usage: ut_test [INPUT_FILE]\n";
+    print "\n";
+    print "Run this tool from the BUILDTOP.\n";
+    print "\n";
+    print 'IMPORTANT: Take a backup before you run this tool. You might ' .
+    "lose your changes.\n";
+}
+# Parse arguments
+if (scalar @ARGV == 1)
+{
+    help();
+    exit 0;
+}
+
+# Set default values
+my $file = $ARGV[1];
+my $log_file = "$ARGV[0].log";
+
+die "$file is not a file" unless -f $file;
+
+# Initialize logger
+my $file_appender = Log::Log4perl::Appender->new(
+    "Log::Log4perl::Appender::File",
+    filename => $log_file,
+    mode => 'append',
+);
+my $file_layout = Log::Log4perl::Layout::PatternLayout->new(
+    "%d (%F:%L)> %p: %m%n");
+$file_appender->layout($file_layout);
+
+my $screen_appender = Log::Log4perl::Appender->new(
+    "Log::Log4perl::Appender::ScreenColoredLevels",
+);
+my $screen_layout = Log::Log4perl::Layout::PatternLayout->new(
+    "%p: %m%n");
+$screen_appender->layout($screen_layout);
+$screen_appender->threshold($INFO);
+
+my $main_logger = get_logger('main');
+$main_logger->level($INFO);
+$main_logger->add_appender($file_appender);
+$main_logger->add_appender($screen_appender);
+
+my $mm_logger = get_logger('mm');
+$mm_logger->level($DEBUG);
+$mm_logger->add_appender($file_appender);
+$mm_logger->add_appender($screen_appender);
+
+my $modifier_logger = get_logger('modifier');
+$modifier_logger->level($DEBUG);
+$modifier_logger->add_appender($file_appender);
+$modifier_logger->add_appender($screen_appender);
+
+my $ut_test_logger = get_logger('ut_test');
+$ut_test_logger->level($DEBUG);
+$ut_test_logger->add_appender($file_appender);
+$ut_test_logger->add_appender($screen_appender);
+
+my $launcher_logger = get_logger('launcher');
+$launcher_logger->level($DEBUG);
+$launcher_logger->add_appender($file_appender);
+$launcher_logger->add_appender($screen_appender);
+
+# Parse conf file
+my %files_by = %{UTTest::parse_conf($file)};
+$ut_test_logger->debug(Dumper \%files_by);
+
+my $rc;
+my @uts = keys %files_by;
+foreach my $ut (@uts)
+{
+    # First check if the UT is broken or not.
+    $main_logger->info("Testing $ut");
+    $rc = UTTest::compile($ut);
+    if ($rc != 0)
+    {
+        $main_logger->warn("Please fix $ut before running this tool");
+        next;
+    }
+    $rc = UTTest::check($ut);
+    if ($rc != 0)
+    {
+        $main_logger->warn("Please fix $ut before running this tool");
+        next;
+    }
+    
+    # Now we are sure that the UT is correct. Now we make our changes.
+    UTTest::test($ut, $files_by{$ut});
+}
