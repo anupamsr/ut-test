@@ -146,7 +146,7 @@ sub test
         my @file_content = <FH>;
         close FH;
 
-        foreach my $modifier (@modifiers)
+        foreach my $modifier (sort {uc($a) cmp uc($b)} @modifiers)
         {
             # Skip if cannot be used
             next unless $modifier->can('modify');
