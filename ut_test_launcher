@@ -82,10 +82,14 @@ $ut_test_logger->debug(Dumper \%files_by);
 
 my $rc;
 my @uts = keys %files_by;
+my $ut_sl_num = 0;
+my $ut_total = scalar @uts;
 foreach my $ut (@uts)
 {
+    ++$ut_sl_num;
+
     # First check if the UT is broken or not.
-    $main_logger->info("Testing $ut");
+    $main_logger->info("($ut_sl_num/$ut_total) Testing $ut");
     $rc = UTTest::compile($ut);
     if ($rc != 0)
     {
