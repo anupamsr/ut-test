@@ -44,6 +44,7 @@ sub modify
             'temporary file... skipping');
 
         $changes_made = 0;
+
         # Make changes
         $logger->info("Running $self on $file");
         foreach my $line (@file_content)
@@ -72,7 +73,7 @@ sub modify
     # Copy temp file back to original location
     if ($changes_made > 0)
     {
-        $logger->debug("Copying back changes to $file");
+        $logger->debug("Copying back changes from $file_tmp to $file");
         copy($file_tmp, $file) or $logger->fatal("Couldn't copy temporary " .
             'file to the original location... skipping');
     }

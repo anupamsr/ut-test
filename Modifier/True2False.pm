@@ -44,6 +44,7 @@ sub modify
             'temporary file... skipping');
 
         $changes_made = 0;
+
         # Make changes
         $logger->info("Running $self on $file");
         foreach my $line (@file_content)
