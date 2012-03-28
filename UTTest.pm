@@ -183,7 +183,7 @@ sub test
     foreach my $file (@files)
     {
         # Read file contents into an array
-        open FH, '<', $file or $logger->fatal("Error opening $file for " .
+        open FH, '<', $file or $logger->fatal("Error opening '$file' for " .
             'reading... skipping!');
         my @file_content = <FH>;
         close FH;
