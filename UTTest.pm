@@ -95,6 +95,27 @@ sub compile
     return $rc;
 }
 
+sub recompile
+{
+    my $ut = shift;
+    croak 'No argument passed' unless defined $ut;
+
+    my $logger = get_logger('ut_test');
+
+    $logger->debug("Recompiling $ut");
+    print 'Recompiling... ';
+    my $rc = MM::recompile($ut);
+    if ($rc != 0)
+    {
+        print "FAIL\n";
+        $logger->debug("Recompilation failed with rc = $rc");
+        return $rc;
+    }
+    print "OK\n";
+    $logger->debug('Recompilation passed');
+    return $rc;
+}
+
 sub check
 {
     my $ut = shift;
@@ -113,6 +134,27 @@ sub check
     }
     print "OK\n";
     $logger->debug('Check passed');
+    return $rc;
+}
+
+sub recheck
+{
+    my $ut = shift;
+    croak 'No argument passed' unless defined $ut;
+
+    my $logger = get_logger('ut_test');
+
+    $logger->debug("Rechecking $ut");
+    print 'Rechecking... ';
+    my $rc = MM::recheck($ut);
+    if ($rc != 0)
+    {
+        print "FAIL\n";
+        $logger->debug("Recheck failed with rc = $rc");
+        return $rc;
+    }
+    print "OK\n";
+    $logger->debug('Recheck passed');
     return $rc;
 }
 
@@ -158,10 +200,10 @@ sub test
             }
             elsif ($rc > 0)
             {
-                $rc = compile($ut);
+                $rc = recompile($ut);
                 if ($rc == 0)
                 {
-                    $rc = check($ut);
+                    $rc = recheck($ut);
                     if ($rc == 0)
                     {
                         $logger->error("PROBLEM: $ut did't catch this type of bug");

@@ -21,6 +21,20 @@ sub compile
     return $rc;
 }
 
+sub recompile
+{
+    my $ut  = shift;
+
+    my $logger = get_logger("mm");
+
+    my $cmd = "mm remake $ut";
+    my %output = %{Launcher::sync($cmd, $logger)};
+    $logger->debug(Dumper \%output);
+
+    my $rc = $output{rc};
+    return $rc;
+}
+
 sub check
 {
     my $ut  = shift;
@@ -28,6 +42,20 @@ sub check
     my $logger = get_logger("mm");
 
     my $cmd = "mm check $ut";
+    my %output = %{Launcher::sync($cmd, $logger)};
+    $logger->debug(Dumper \%output);
+
+    my $rc = $output{rc};
+    return $rc;
+}
+
+sub recheck
+{
+    my $ut  = shift;
+
+    my $logger = get_logger("mm");
+
+    my $cmd = "mm recheck $ut";
     my %output = %{Launcher::sync($cmd, $logger)};
     $logger->debug(Dumper \%output);
 
