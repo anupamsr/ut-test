@@ -24,7 +24,7 @@ sub parse_conf
     my %parsed_hash;
     while (my $line = <FILE>)
     {
-        chomp ($line);
+        chomp $line;
 
         # This is a comment
         if ($line =~ m/^\s*#/)
@@ -36,17 +36,17 @@ sub parse_conf
         elsif ($line =~ m/tst\s*:\s*$/)
         {
             $ut = $line;
-            $ut =~ s/:\s*$//;
+            $ut =~ s/^\s*(\S+)\s*:\s*$/$1/;
         }
 
         # This is a file, which should correspond to a UT
-        elsif ($line =~ m/^\s*-\s*\w+/)
+        elsif ($line =~ m/^\s*-\s*\S+\s*$/)
         {
             $logger->fatal('File specified without mentioning unit test case ' .
                 "($line)$!") unless defined $ut;
 
             my $file = $line;
-            $file =~ s/^\s*-\s*//; # Remove whitespace
+            $file =~ s/^\s*-\s*(\S+)\s*$/$1/;
 
             my @files;
             if (defined $parsed_hash{$ut})
