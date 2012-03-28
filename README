@@ -8,4 +8,6 @@ UT Test takes a list of unit test cases and corresponding files to be tested
 through an input file that mildly resembles YAML. Check 'ut_test_input' for
 sample input format.
 
+Clone and modify the tool, and submit patches!!!
+
 This tool should be run from the buildtop.
