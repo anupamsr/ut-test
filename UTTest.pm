@@ -40,10 +40,10 @@ sub parse_conf
         }
 
         # This is a file, which should correspond to a UT
-        elsif ($line =~ m/^\s*-\s*\S+\s*$/)
+        elsif ($line =~ m/^\s*-\s*\S+/)
         {
             $logger->fatal('File specified without mentioning unit test case ' .
-                "($line)$!") unless defined $ut;
+                "($line) $!") unless $ut ne '';
 
             my $file = $line;
             $file =~ s/^\s*-\s*(\S+)\s*$/$1/;
@@ -65,7 +65,7 @@ sub parse_conf
         # Nothing else is allowed
         else
         {
-            $logger->fatal("Problem parsing $file, encountered '$line'$!");
+            $logger->fatal("Problem parsing $file, encountered '$line' $!");
         }
     }
     
