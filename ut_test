@@ -7,8 +7,22 @@ use FindBin;
 use lib "$FindBin::RealBin"; # use the location of script
 
 # Check if BUILDTOP is set
-die 'BUILDTOP is not set' unless defined $ENV{BUILDTOP};
+die "BUILDTOP is not set.\n" unless defined $ENV{BUILDTOP};
 
-die '1 and only 1 argument is needed' if scalar @ARGV > 1;
+if (scalar @ARGV > 1)
+{
+    if ($ARGV[0] ne '--')
+    {
+        die "1 and only 1 argument is needed, unless 1st argument is '--'.\n";
+    }
+    elsif (not defined $ARGV[2])
+    {
+        die "Need at least 1 source file after test case name.\n";
+    }
+}
+elsif ($ARGV[0] eq '--')
+{
+    die "Need 1 test case and at least 1 source file after '--'.\n";
+}
 
 exec "$FindBin::RealBin/ut_test_launcher", $FindBin::Script, @ARGV;

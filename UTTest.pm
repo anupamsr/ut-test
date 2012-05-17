@@ -21,7 +21,7 @@ sub parse_conf
 
     print "Parsing configuration file $file ... ";
     my $ut = '';
-    my %parsed_hash;
+    my %files_by;
     while (my $line = <FILE>)
     {
         chomp $line;
@@ -49,12 +49,12 @@ sub parse_conf
             $file =~ s/^\s*-\s*(\S+)\s*$/$1/;
 
             my @files;
-            if (defined $parsed_hash{$ut})
+            if (defined $files_by{$ut})
             {
-                @files = @{$parsed_hash{$ut}};
+                @files = @{$files_by{$ut}};
             }
             push @files, $file;
-            $parsed_hash{$ut} = \@files;
+            $files_by{$ut} = \@files;
         }
 
         # This is just a blank file
@@ -71,7 +71,7 @@ sub parse_conf
     
     print "DONE\n";
     close $file;
-    return \%parsed_hash;
+    return \%files_by;
 }
 
 sub compile

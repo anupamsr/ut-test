@@ -14,12 +14,14 @@ use UTTest;
 sub help()
 {
     print "Usage: ut_test [INPUT_FILE]\n";
+    print "Usage: ut_test -- test.tst file1 file2 ...\n";
     print "\n";
     print "Run this tool from the BUILDTOP.\n";
     print "\n";
     print 'IMPORTANT: Take a backup before you run this tool. You might ' .
     "lose your changes.\n";
 }
+
 # Parse arguments
 if (scalar @ARGV == 1)
 {
@@ -27,13 +29,8 @@ if (scalar @ARGV == 1)
     exit 0;
 }
 
-# Set default values
-my $file = $ARGV[1];
-my $log_file = "$ARGV[0].log";
-
-die "$file is not a file" unless -f $file;
-
 # Initialize logger
+my $log_file = "$ARGV[0].log";
 my $file_appender = Log::Log4perl::Appender->new(
     "Log::Log4perl::Appender::File",
     filename => $log_file,
@@ -76,12 +73,35 @@ $launcher_logger->level($DEBUG);
 $launcher_logger->add_appender($file_appender);
 $launcher_logger->add_appender($screen_appender);
 
-# Parse conf file
-my %files_by = %{UTTest::parse_conf($file)};
+# Initialize the list of uts
+my @uts;
+my %files_by;
+
+# Check if we are skipping input file in favor of command line arguments
+if ($ARGV[1] eq '--')
+{
+    # Get UT
+    my $ut = $ARGV[2];
+    push @uts, $ut;
+
+    # Get file list
+    my @files = @ARGV[3..$#ARGV];
+    $files_by{$ut} = \@files;
+}
+else
+{
+    # Set default values
+    my $file = $ARGV[1];
+
+    die "$file is not a file" unless -f $file;
+
+    # Parse conf file
+    %files_by = %{UTTest::parse_conf($file)};
+}
 $ut_test_logger->debug(Dumper \%files_by);
 
 my $rc;
-my @uts = keys %files_by;
+@uts = keys %files_by;
 my $ut_sl_num = 0;
 my $ut_total = scalar @uts;
 foreach my $ut (@uts)
