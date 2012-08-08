@@ -9,7 +9,7 @@ use lib "$FindBin::RealBin"; # use the location of script
 # Check if BUILDTOP is set
 die "BUILDTOP is not set.\n" unless defined $ENV{BUILDTOP};
 
-die "1 and only 1 argument is needed, unless 1st argument is '--'.\n" unless
+die "1 argument specifying input file is needed. None specified.\n" unless
 defined @ARGV;
 
 if (scalar @ARGV > 1)
