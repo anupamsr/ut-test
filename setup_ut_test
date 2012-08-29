@@ -1,0 +1,36 @@
+#!/bin/zsh
+
+buildtop_err () {
+	echo 'Set BUILDTOP correctly (ends with code/) and then cd to it before running this tool'>&2
+	exit 1
+}
+
+if [[ -z "${BUILDTOP+xxx}" ]]; then
+	buildtop_err
+elif [[ -z "$BUILDTOP" ]] && [[ "${BUILDTOP+xxx}" = "xxx" ]]; then
+	buildtop_err
+else
+	if [[ $BUILDTOP != $PWD ]]; then
+		buildtop_err
+	elif [[ $(basename $PWD) != "code" ]]; then
+		buildtop_err
+		exit 1
+	fi
+fi
+
+orig_dir=$PWD
+cd $HOME
+echo 'setenv PATH $HOME/bin:$PATH'>>.cshrc
+echo 'export PATH=$HOME/bin:$PATH'>>.bashrc
+echo 'export PATH=$HOME/bin:$PATH'>>.zshrc
+mkdir -p bin
+cd bin
+rm -rf ut_test
+ln -s /x/home/ansrivastava/src/UTTest/ut_test
+cd $orig_dir
+echo 'Done.'
+cp /x/home/ansrivastava/src/UTTest/input.txt .
+echo ''
+echo 'Edit input.txt to configure'
+echo ''
+echo 'To use, run $HOME/bin/ut_test input.txt'
