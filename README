@@ -10,6 +10,10 @@ sample input format.
 
 Clone and modify the tool, and submit patches!!!
 
-This tool should be run from the buildtop.
+This tool was originally written for eBay/PayPal Inc. Currently, the setup
+script works only for that kind of home environment and will probably not run
+for you without some modifications.
 
-Website: https://github.corp.ebay.com/ansrivastava/ut_test
+For eBay/PayPal Inc. employees, this tool should be run from the buildtop.
+
+Website: https://github.com/ansrivastava/ut-test
