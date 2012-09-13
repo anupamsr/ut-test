@@ -47,14 +47,16 @@ sub modify
 
         # Make changes
         $logger->info("Running $self on $file");
+        my $line_num= 0;
         foreach my $line (@file_content)
         {
             chomp $line;
+            ++$line_num;
             if ($line =~ m/\s*!=\s*/)
             {
-                $logger->debug("OLD: $line");
+                $logger->debug("OLD: $line_num: $line");
                 $line =~ s/!=/==/;
-                $logger->debug("NEW: $line");
+                $logger->debug("NEW: $line_num: $line");
                 ++$changes_made;
             }
             print FH "$line\n";
