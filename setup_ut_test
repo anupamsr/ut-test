@@ -25,7 +25,7 @@ echo 'export PATH=$HOME/bin:$PATH'>>.bashrc
 echo 'export PATH=$HOME/bin:$PATH'>>.zshrc
 mkdir -p bin
 cd bin
-rm -rf ut_test
+mv ut_test ut_test.$(date -u +%s)
 ln -s /x/home/ansrivastava/src/UTTest/ut_test
 cd $orig_dir
 echo 'Done.'
