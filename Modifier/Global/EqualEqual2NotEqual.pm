@@ -1,4 +1,4 @@
-package Modifier::True2False;
+package Modifier::Global::EqualEqual2NotEqual;
 
 use Carp;
 use Data::Dumper;
@@ -38,7 +38,7 @@ sub modify
 
     my $file_tmp = $file . '.tmp.' . timelocal(gmtime());
     my $changes_made = -1;
-    if ($file_type eq 'h' or $file_type eq 'cpp')
+    if ($file_type eq 'cpp')
     {
         open FH, '>', $file_tmp or $logger->fatal('Error writing to the ' .
             'temporary file... skipping');
@@ -52,10 +52,10 @@ sub modify
         {
             chomp $line;
             ++$line_num;
-            if ($line =~ m/\s*true\s*/)
+            if ($line =~ m/\s*==\s*/)
             {
                 $logger->debug("OLD: $line_num: $line");
-                $line =~ s/true/false/;
+                $line =~ s/==/!=/;
                 $logger->debug("NEW: $line_num: $line");
                 ++$changes_made;
             }

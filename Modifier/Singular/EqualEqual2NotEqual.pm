@@ -1,4 +1,4 @@
-package Modifier::Plus2Minus;
+package Modifier::Singular::EqualEqual2NotEqual;
 
 use Carp;
 use Data::Dumper;
@@ -52,17 +52,10 @@ sub modify
         {
             chomp $line;
             ++$line_num;
-            if ($line =~ m/^[^\+]+\+\+[^\+]*/)
+            if ($line =~ m/\s*==\s*/)
             {
                 $logger->debug("OLD: $line_num: $line");
-                $line =~ s/\+\+/--/;
-                $logger->debug("NEW: $line_num: $line");
-                ++$changes_made;
-            }
-            elsif ($line =~ m/^[^\+]+\+[^\+]*/)
-            {
-                $logger->debug("OLD: $line_num: $line");
-                $line =~ s/\+/-/;
+                $line =~ s/==/!=/;
                 $logger->debug("NEW: $line_num: $line");
                 ++$changes_made;
             }

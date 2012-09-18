@@ -1,4 +1,4 @@
-package Modifier::NotEqual2EqualEqual;
+package Modifier::Global::CommentThrow;
 
 use Carp;
 use Data::Dumper;
@@ -52,10 +52,10 @@ sub modify
         {
             chomp $line;
             ++$line_num;
-            if ($line =~ m/\s*!=\s*/)
+            if ($line =~ m/\s*throw\s*/)
             {
                 $logger->debug("OLD: $line_num: $line");
-                $line =~ s/!=/==/;
+                $line =~ s/throw/\/\/throw/;
                 $logger->debug("NEW: $line_num: $line");
                 ++$changes_made;
             }

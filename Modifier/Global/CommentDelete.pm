@@ -1,4 +1,4 @@
-package Modifier::Or2And;
+package Modifier::Global::CommentThrow;
 
 use Carp;
 use Data::Dumper;
@@ -46,22 +46,7 @@ sub modify
         $changes_made = 0;
 
         # Make changes
-        $logger->info("Running $self on $file");
-        my $line_num= 0;
-        foreach my $line (@file_content)
-        {
-            chomp $line;
-            ++$line_num;
-            if ($line =~ m/^.*\|\|.*/)
-            {
-                $logger->debug("OLD: $line_num: $line");
-                $line =~ s/\|\|/&&/;
-                $logger->debug("NEW: $line_num: $line");
-                ++$changes_made;
-            }
-            print FH "$line\n";
-        }
-
+        $logger->debug("Cannot run $self on $file, currently not supported");
         close FH;
     }
 
