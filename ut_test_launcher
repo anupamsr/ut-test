@@ -124,5 +124,45 @@ foreach my $ut (@uts)
     }
     
     # Now we are sure that the UT is correct. Now we make our changes.
-    UTTest::test($ut, $files_by{$ut});
+    my @modifiers = @{UTTest::get_modifiers()};
+
+    foreach my $file (@{$files_by{$ut}})
+    {
+        # Read file contents into an array
+        open FH, '<', $file or $main_logger->fatal("Error opening '$file' for " .
+            'reading... skipping!');
+        my @file_content = <FH>;
+        close FH;
+
+        foreach my $modifier (sort {uc($a) cmp uc($b)} @modifiers)
+        {
+            # Skip if cannot be used
+            next unless $modifier->can('modify');
+
+            my $rc = $modifier->modify($file, \@file_content);
+            if ($rc == 0)
+            {
+                $main_logger->debug('Nothing to modify');
+            }
+            elsif ($rc > 0)
+            {
+                $rc = UTTest::recompile($ut);
+                if ($rc == 0)
+                {
+                    $rc = UTTest::recheck($ut);
+                    if ($rc == 0)
+                    {
+                        $main_logger->error("PROBLEM: $ut did't catch this type of bug");
+                    }
+                }
+
+                # Restore original
+                $main_logger->debug("Restoring original $file");
+                open FH, '>', $file or $main_logger->fatal("Couldn't restore, " .
+                    ' please do it manually.');
+                print FH @file_content;
+                close FH;
+            }
+        }
+    }
 }
