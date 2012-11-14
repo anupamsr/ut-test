@@ -5,7 +5,6 @@ use warnings;
 
 use FindBin;
 use lib "$FindBin::RealBin"; # use the location of script
-use lib "$ENV{BUILDTOP}/qatools/perllib/3rdParty/"; # use for Log4perl
 
 use Data::Dumper;
 use Log::Log4perl qw(get_logger :levels);
@@ -16,10 +15,8 @@ sub help()
     print "Usage: ut_test [INPUT_FILE]\n";
     print "Usage: ut_test -- test.tst file1 file2 ...\n";
     print "\n";
-    print "Run this tool from the BUILDTOP.\n";
-    print "\n";
-    print 'IMPORTANT: Take a backup before you run this tool. You might ' .
-    "lose your changes.\n";
+    print 'NOTE: We advise that you take a backup of your code before ' .
+    "running this tool\n";
 }
 
 # Parse arguments
@@ -53,10 +50,10 @@ $main_logger->level($INFO);
 $main_logger->add_appender($file_appender);
 $main_logger->add_appender($screen_appender);
 
-my $mm_logger = get_logger('mm');
-$mm_logger->level($DEBUG);
-$mm_logger->add_appender($file_appender);
-$mm_logger->add_appender($screen_appender);
+my $make_logger = get_logger('make');
+$make_logger->level($DEBUG);
+$make_logger->add_appender($file_appender);
+$make_logger->add_appender($screen_appender);
 
 my $modifier_logger = get_logger('modifier');
 $modifier_logger->level($DEBUG);

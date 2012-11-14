@@ -7,7 +7,7 @@ use Carp;
 use Data::Dumper;
 use File::Copy;
 use Log::Log4perl qw(get_logger);
-use MM;
+use Make;
 use Modifier;
 
 sub parse_conf
@@ -83,7 +83,7 @@ sub compile
 
     $logger->debug("Compiling $ut");
     print 'Compiling... ';
-    my $rc = MM::compile($ut);
+    my $rc = Make::compile($ut);
     if ($rc != 0)
     {
         print "FAIL\n";
@@ -104,7 +104,7 @@ sub recompile
 
     $logger->debug("Recompiling $ut");
     print 'Recompiling... ';
-    my $rc = MM::recompile($ut);
+    my $rc = Make::recompile($ut);
     if ($rc != 0)
     {
         print "FAIL\n";
@@ -125,7 +125,7 @@ sub check
 
     $logger->debug("Checking $ut");
     print 'Checking... ';
-    my $rc = MM::check($ut);
+    my $rc = Make::check($ut);
     if ($rc != 0)
     {
         print "FAIL\n";
@@ -146,7 +146,7 @@ sub recheck
 
     $logger->debug("Rechecking $ut");
     print 'Rechecking... ';
-    my $rc = MM::recheck($ut);
+    my $rc = Make::recheck($ut);
     if ($rc != 0)
     {
         print "FAIL\n";
